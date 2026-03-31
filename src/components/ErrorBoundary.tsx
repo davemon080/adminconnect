@@ -41,7 +41,7 @@ class ErrorBoundary extends Component<Props, State> {
               {this.state.message}
             </p>
             <div style={{ marginTop: 20, padding: 16, borderRadius: 16, background: '#fff7ed', color: '#9a3412', fontSize: 14, lineHeight: 1.6 }}>
-              Common fixes: make sure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set in your deployment environment, and confirm the admin app is serving its built assets from the correct path.
+              Common fixes: make sure `VITE_ADMIN_SUPABASE_URL` and `VITE_ADMIN_SUPABASE_ANON_KEY` are set in the `connect_admin` deployment environment, and confirm the admin app is serving its built assets from the correct path.
             </div>
           </div>
         </div>

@@ -4,7 +4,6 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   base: './',
-  envDir: '..',
   plugins: [react(), tailwindcss()],
   server: {
     hmr: process.env.DISABLE_HMR !== 'true',
