@@ -277,8 +277,9 @@ function mapWallet(row: DbAdminWallet): AdminWallet {
 
 function mapMarketSettings(row: DbAdminMarketSettings | null, uid: string): AdminMarketSettings {
   const accessOverride = row?.admin_access_override || 'inherit';
+  const baseIsRegistered = !!row?.is_registered;
   const isRegistered =
-    accessOverride === 'force_unlock' ? true : accessOverride === 'force_lock' ? false : !!row?.is_registered;
+    accessOverride === 'force_unlock' ? true : accessOverride === 'force_lock' ? false : baseIsRegistered;
   const accessSource =
     accessOverride === 'force_unlock'
       ? 'admin_override_unlock'
@@ -292,6 +293,7 @@ function mapMarketSettings(row: DbAdminMarketSettings | null, uid: string): Admi
     phoneNumber: row?.phone_number || undefined,
     location: row?.location || undefined,
     brandName: row?.brand_name || undefined,
+    baseIsRegistered,
     isRegistered,
     registeredAt: row?.registered_at || undefined,
     accessOverride,

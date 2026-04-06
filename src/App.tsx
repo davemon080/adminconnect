@@ -119,7 +119,7 @@ function buildProfileDraft(user: AdminUserCommandCenter): UserProfileDraft {
 
 function buildMarketDraft(user: AdminUserCommandCenter): MarketDraft {
   return {
-    isRegistered: user.marketSettings.isRegistered,
+    isRegistered: user.marketSettings.baseIsRegistered,
     accessOverride: user.marketSettings.accessOverride,
     phoneNumber: user.marketSettings.phoneNumber || '',
     location: user.marketSettings.location || '',
@@ -937,8 +937,6 @@ function UserCommandCenter({
                           ? {
                               ...prev,
                               accessOverride: value,
-                              isRegistered:
-                                value === 'force_unlock' ? true : value === 'force_lock' ? false : prev.isRegistered,
                             }
                           : prev
                       )
