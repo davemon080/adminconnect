@@ -961,6 +961,56 @@ function UserCommandCenter({
                     <LabeledInput label="Market location" value={marketDraft.location} onChange={(value) => setMarketDraft((prev) => prev ? { ...prev, location: value } : prev)} />
                   </div>
                 </div>
+                <div className="mt-5 grid gap-3 md:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setMarketDraft((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              accessOverride: 'force_unlock',
+                            }
+                          : prev
+                      )
+                    }
+                    className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                  >
+                    Grant market access without payment
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setMarketDraft((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              accessOverride: 'force_lock',
+                            }
+                          : prev
+                      )
+                    }
+                    className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-left text-sm font-semibold text-rose-800 transition hover:bg-rose-100"
+                  >
+                    Disable market access for this user
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setMarketDraft((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              accessOverride: 'inherit',
+                            }
+                          : prev
+                      )
+                    }
+                    className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50 md:col-span-2"
+                  >
+                    Return to normal access rules
+                  </button>
+                </div>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <ActionButton label="Save market controls" tone="dark" onClick={onSaveMarketAccess} />
                   <SoftMetaChip
