@@ -79,6 +79,7 @@ type UserProfileDraft = {
 
 type MarketDraft = {
   isRegistered: boolean;
+  accessOverride: 'inherit' | 'force_unlock' | 'force_lock';
   phoneNumber: string;
   location: string;
   brandName: string;
@@ -119,6 +120,7 @@ function buildProfileDraft(user: AdminUserCommandCenter): UserProfileDraft {
 function buildMarketDraft(user: AdminUserCommandCenter): MarketDraft {
   return {
     isRegistered: user.marketSettings.isRegistered,
+    accessOverride: user.marketSettings.accessOverride,
     phoneNumber: user.marketSettings.phoneNumber || '',
     location: user.marketSettings.location || '',
     brandName: user.marketSettings.brandName || '',
@@ -345,6 +347,7 @@ function App() {
     await runAction('Updating marketplace access', async () => {
       await adminService.updateMarketplaceAccess(selectedUser.profile.uid, {
         isRegistered: marketDraft.isRegistered,
+        accessOverride: marketDraft.accessOverride,
         phoneNumber: marketDraft.phoneNumber.trim(),
         location: marketDraft.location.trim(),
         brandName: marketDraft.brandName.trim(),
@@ -925,7 +928,32 @@ function UserCommandCenter({
             <div className="grid gap-5 2xl:grid-cols-[0.95fr_1.05fr]">
               <AdminPanel title="Marketplace and partner access" subtitle="Override marketplace registration and manage partner approval without leaving the user context." icon={Store}>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <ToggleRow label="Marketplace unlocked" checked={marketDraft.isRegistered} onChange={(checked) => setMarketDraft((prev) => prev ? { ...prev, isRegistered: checked } : prev)} />
+                  <LabeledSelect<'inherit' | 'force_unlock' | 'force_lock'>
+                    label="Admin access override"
+                    value={marketDraft.accessOverride}
+                    onChange={(value) =>
+                      setMarketDraft((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              accessOverride: value,
+                              isRegistered:
+                                value === 'force_unlock' ? true : value === 'force_lock' ? false : prev.isRegistered,
+                            }
+                          : prev
+                      )
+                    }
+                    options={[
+                      { value: 'inherit', label: 'Use user access state' },
+                      { value: 'force_unlock', label: 'Force unlock market' },
+                      { value: 'force_lock', label: 'Force lock market' },
+                    ]}
+                  />
+                  <ToggleRow
+                    label="Base marketplace unlocked"
+                    checked={marketDraft.isRegistered}
+                    onChange={(checked) => setMarketDraft((prev) => (prev ? { ...prev, isRegistered: checked } : prev))}
+                  />
                   <ToggleRow label="Show brand name" checked={marketDraft.showBrandName} onChange={(checked) => setMarketDraft((prev) => prev ? { ...prev, showBrandName: checked } : prev)} />
                   <ToggleRow label="Show phone number" checked={marketDraft.showPhoneNumber} onChange={(checked) => setMarketDraft((prev) => prev ? { ...prev, showPhoneNumber: checked } : prev)} />
                   <ToggleRow label="Show location" checked={marketDraft.showLocation} onChange={(checked) => setMarketDraft((prev) => prev ? { ...prev, showLocation: checked } : prev)} />
@@ -937,6 +965,18 @@ function UserCommandCenter({
                 </div>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <ActionButton label="Save market controls" tone="dark" onClick={onSaveMarketAccess} />
+                  <SoftMetaChip
+                    icon={Store}
+                    text={
+                      selectedUser.marketSettings.accessSource === 'admin_override_unlock'
+                        ? 'Live access: forced unlocked by admin'
+                        : selectedUser.marketSettings.accessSource === 'admin_override_lock'
+                        ? 'Live access: forced locked by admin'
+                        : selectedUser.marketSettings.accessSource === 'payment'
+                        ? 'Live access: unlocked by user registration'
+                        : 'Live access: currently locked'
+                    }
+                  />
                   {selectedUser.partnerRequest ? (
                     <>
                       <ActionButton label="Approve partner request" tone="light" onClick={() => onApprovePartner(selectedUser.partnerRequest!.id)} />
@@ -955,7 +995,19 @@ function UserCommandCenter({
                   <FootprintCard label="Proposals" value={selectedUser.metrics.proposals} icon={ArrowRight} />
                   <FootprintCard label="Connections" value={selectedUser.metrics.connections} icon={UserRound} />
                   <FootprintCard label="Pending requests" value={selectedUser.metrics.pendingRequests} icon={Activity} />
-                  <FootprintCard label="Market live" value={selectedUser.marketSettings.isRegistered ? 'Unlocked' : 'Locked'} icon={Store} />
+                  <FootprintCard
+                    label="Market live"
+                    value={
+                      selectedUser.marketSettings.accessSource === 'admin_override_unlock'
+                        ? 'Forced unlock'
+                        : selectedUser.marketSettings.accessSource === 'admin_override_lock'
+                        ? 'Forced lock'
+                        : selectedUser.marketSettings.isRegistered
+                        ? 'Unlocked'
+                        : 'Locked'
+                    }
+                    icon={Store}
+                  />
                 </div>
               </AdminPanel>
             </div>

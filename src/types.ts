@@ -118,6 +118,9 @@ export interface AdminMarketSettings {
   brandName?: string;
   isRegistered: boolean;
   registeredAt?: string;
+  accessOverride: 'inherit' | 'force_unlock' | 'force_lock';
+  accessSource: 'payment' | 'admin_override_unlock' | 'admin_override_lock' | 'unregistered';
+  adminOverrideUpdatedAt?: string;
   showPhoneNumber: boolean;
   showLocation: boolean;
   showBrandName: boolean;

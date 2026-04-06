@@ -123,6 +123,8 @@ type DbAdminMarketSettings = {
   brand_name?: string | null;
   is_registered?: boolean | null;
   registered_at?: string | null;
+  admin_access_override?: 'inherit' | 'force_unlock' | 'force_lock' | null;
+  admin_override_updated_at?: string | null;
   show_phone_number?: boolean | null;
   show_location?: boolean | null;
   show_brand_name?: boolean | null;
@@ -274,13 +276,27 @@ function mapWallet(row: DbAdminWallet): AdminWallet {
 }
 
 function mapMarketSettings(row: DbAdminMarketSettings | null, uid: string): AdminMarketSettings {
+  const accessOverride = row?.admin_access_override || 'inherit';
+  const isRegistered =
+    accessOverride === 'force_unlock' ? true : accessOverride === 'force_lock' ? false : !!row?.is_registered;
+  const accessSource =
+    accessOverride === 'force_unlock'
+      ? 'admin_override_unlock'
+      : accessOverride === 'force_lock'
+      ? 'admin_override_lock'
+      : row?.is_registered
+      ? 'payment'
+      : 'unregistered';
   return {
     userUid: uid,
     phoneNumber: row?.phone_number || undefined,
     location: row?.location || undefined,
     brandName: row?.brand_name || undefined,
-    isRegistered: !!row?.is_registered,
+    isRegistered,
     registeredAt: row?.registered_at || undefined,
+    accessOverride,
+    accessSource,
+    adminOverrideUpdatedAt: row?.admin_override_updated_at || undefined,
     showPhoneNumber: row?.show_phone_number ?? false,
     showLocation: row?.show_location ?? false,
     showBrandName: row?.show_brand_name ?? true,
@@ -770,6 +786,7 @@ export const adminService = {
     uid: string,
     updates: {
       isRegistered: boolean;
+      accessOverride: 'inherit' | 'force_unlock' | 'force_lock';
       phoneNumber?: string;
       location?: string;
       brandName?: string;
@@ -789,6 +806,8 @@ export const adminService = {
             brand_name: updates.brandName || null,
             is_registered: updates.isRegistered,
             registered_at: updates.isRegistered ? new Date().toISOString() : null,
+            admin_access_override: updates.accessOverride,
+            admin_override_updated_at: new Date().toISOString(),
             show_phone_number: updates.showPhoneNumber,
             show_location: updates.showLocation,
             show_brand_name: updates.showBrandName,
