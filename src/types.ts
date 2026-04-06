@@ -1,12 +1,36 @@
 export type AdminTab = 'overview' | 'users' | 'partners' | 'jobs' | 'market' | 'feed' | 'wallet';
 
+export type AdminUserRole = 'freelancer' | 'client' | 'admin';
+
 export interface AdminUserProfile {
   uid: string;
+  publicId?: string;
   email: string;
   displayName: string;
   photoURL: string;
-  role: 'freelancer' | 'client' | 'admin';
+  coverPhotoURL?: string;
+  role: AdminUserRole;
+  bio?: string;
+  phoneNumber?: string;
+  status?: string;
   location?: string;
+  skills: string[];
+  education?: {
+    university?: string;
+    degree?: string;
+    year?: string;
+    verified?: boolean;
+  };
+  socialLinks?: {
+    linkedin?: string;
+    github?: string;
+    twitter?: string;
+    website?: string;
+  };
+  companyInfo?: {
+    name?: string;
+    about?: string;
+  };
   createdAt?: string;
 }
 
@@ -76,6 +100,91 @@ export interface AdminWalletTransaction {
   status: 'completed' | 'pending' | 'failed';
   reference?: string;
   createdAt: string;
+}
+
+export interface AdminWallet {
+  id: string;
+  userUid: string;
+  usdBalance: number;
+  ngnBalance: number;
+  eurBalance: number;
+  updatedAt: string;
+}
+
+export interface AdminMarketSettings {
+  userUid: string;
+  phoneNumber?: string;
+  location?: string;
+  brandName?: string;
+  isRegistered: boolean;
+  registeredAt?: string;
+  showPhoneNumber: boolean;
+  showLocation: boolean;
+  showBrandName: boolean;
+}
+
+export interface AdminMessageSummary {
+  id: string;
+  direction: 'sent' | 'received';
+  counterpartyUid: string;
+  counterpartyName: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface AdminFriendRequestSummary {
+  id: string;
+  direction: 'incoming' | 'outgoing';
+  status: 'pending' | 'accepted' | 'rejected';
+  otherUid: string;
+  otherName: string;
+  createdAt: string;
+}
+
+export interface AdminConnectionSummary {
+  id: string;
+  otherUid: string;
+  otherName: string;
+  createdAt: string;
+}
+
+export interface AdminProposal {
+  id: string;
+  freelancerUid: string;
+  jobId: string;
+  content: string;
+  budget: number;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+}
+
+export interface AdminUserMetrics {
+  posts: number;
+  comments: number;
+  jobs: number;
+  marketItems: number;
+  proposals: number;
+  walletTransactions: number;
+  messages: number;
+  connections: number;
+  pendingRequests: number;
+}
+
+export interface AdminUserCommandCenter {
+  profile: AdminUserProfile;
+  wallet: AdminWallet | null;
+  marketSettings: AdminMarketSettings;
+  partnerRequest: AdminPartnerRequest | null;
+  metrics: AdminUserMetrics;
+  posts: AdminPost[];
+  comments: AdminComment[];
+  jobs: AdminJob[];
+  proposals: AdminProposal[];
+  marketItems: AdminMarketItem[];
+  walletTransactions: AdminWalletTransaction[];
+  messages: AdminMessageSummary[];
+  friendRequests: AdminFriendRequestSummary[];
+  connections: AdminConnectionSummary[];
 }
 
 export interface AdminOverview {
