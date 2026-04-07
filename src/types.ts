@@ -145,6 +145,30 @@ export interface AdminSellerRatingSummary {
   createdAt: string;
 }
 
+export interface AdminUserProfileDraft {
+  displayName: string;
+  email: string;
+  role: AdminUserRole;
+  phoneNumber: string;
+  status: string;
+  location: string;
+  bio: string;
+  skills: string;
+  companyName: string;
+  companyAbout: string;
+}
+
+export interface AdminMarketDraft {
+  isRegistered: boolean;
+  accessOverride: 'inherit' | 'force_unlock' | 'force_lock';
+  phoneNumber: string;
+  location: string;
+  brandName: string;
+  showPhoneNumber: boolean;
+  showLocation: boolean;
+  showBrandName: boolean;
+}
+
 export interface AdminMessageSummary {
   id: string;
   direction: 'sent' | 'received';
