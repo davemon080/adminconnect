@@ -21,10 +21,10 @@ export function formatMoney(value: number, currency: 'USD' | 'NGN' | 'EUR') {
 
 export function Panel({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
-    <section className="rounded-[26px] border border-slate-200 bg-slate-50 p-4 sm:p-5">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-        <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+    <section className="rounded-3xl border border-[#dbe3f0] bg-[#f8fafd] p-3.5 shadow-[0_1px_2px_rgba(60,64,67,0.08)] sm:p-4">
+      <div className="mb-3">
+        <h3 className="text-base font-semibold text-[#202124]">{title}</h3>
+        <p className="mt-1 text-xs leading-5 text-[#5f6368]">{subtitle}</p>
       </div>
       {children}
     </section>
@@ -33,7 +33,7 @@ export function Panel({ title, subtitle, children }: { title: string; subtitle: 
 
 export function EmptyState({ body }: { body: string }) {
   return (
-    <div className="rounded-3xl border border-dashed border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-500">
+    <div className="rounded-3xl border border-dashed border-[#dbe3f0] bg-white px-4 py-7 text-center text-sm text-[#5f6368]">
       {body}
     </div>
   );
@@ -41,15 +41,15 @@ export function EmptyState({ body }: { body: string }) {
 
 export function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4">
-      <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</p>
-      <p className="mt-2 text-xl font-semibold text-slate-900">{value}</p>
+    <div className="rounded-[22px] border border-[#dbe3f0] bg-white p-3.5 shadow-[0_1px_2px_rgba(60,64,67,0.08)]">
+      <p className="text-[11px] uppercase tracking-[0.14em] text-[#5f6368]">{label}</p>
+      <p className="mt-1.5 text-lg font-semibold text-[#202124]">{value}</p>
     </div>
   );
 }
 
 export function InfoChip({ text }: { text: string }) {
-  return <span className="inline-flex rounded-full bg-white px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">{text}</span>;
+  return <span className="inline-flex rounded-full border border-[#d2e3fc] bg-[#e8f0fe] px-3 py-1.5 text-[11px] font-medium text-[#1967d2]">{text}</span>;
 }
 
 export function ActionButton({ label, onClick, tone = 'dark' }: { label: string; onClick: () => void; tone?: 'dark' | 'light' }) {
@@ -57,10 +57,10 @@ export function ActionButton({ label, onClick, tone = 'dark' }: { label: string;
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
+      className={`rounded-2xl px-4 py-2.5 text-sm font-medium transition ${
         tone === 'dark'
-          ? 'bg-slate-950 text-white hover:bg-slate-800'
-          : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-100'
+          ? 'bg-[#1a73e8] text-white hover:bg-[#1557b0]'
+          : 'border border-[#dbe3f0] bg-white text-[#3c4043] hover:bg-[#f8fafd]'
       }`}
     >
       {label}
@@ -73,7 +73,7 @@ export function DangerButton({ label, onClick }: { label: string; onClick: () =>
     <button
       type="button"
       onClick={onClick}
-      className="rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
+      className="rounded-2xl border border-[#f5c2c7] bg-white px-4 py-2.5 text-sm font-medium text-[#b3261e] transition hover:bg-[#fce8e6]"
     >
       {label}
     </button>
@@ -92,12 +92,12 @@ export function ListCard({
   actions?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+    <div className="rounded-[22px] border border-[#dbe3f0] bg-white p-3.5 shadow-[0_1px_2px_rgba(60,64,67,0.08)]">
+      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <p className="font-medium text-slate-900">{title}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-500">{subtitle}</p>
-          <p className="mt-2 text-xs text-slate-400">{meta}</p>
+          <p className="text-sm font-medium text-[#202124]">{title}</p>
+          <p className="mt-1 text-sm leading-5 text-[#5f6368]">{subtitle}</p>
+          <p className="mt-2 text-[11px] text-[#80868b]">{meta}</p>
         </div>
         {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
       </div>
@@ -118,13 +118,13 @@ export function InputField({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-2 block text-sm font-medium text-[#3c4043]">{label}</span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+        className="w-full rounded-2xl border border-[#dbe3f0] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#1a73e8] focus:ring-2 focus:ring-[#e8f0fe]"
       />
-      {hint ? <span className="mt-2 block text-xs text-slate-400">{hint}</span> : null}
+      {hint ? <span className="mt-2 block text-[11px] text-[#80868b]">{hint}</span> : null}
     </label>
   );
 }
@@ -140,11 +140,11 @@ export function TextAreaField({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-2 block text-sm font-medium text-[#3c4043]">{label}</span>
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="min-h-[120px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+        className="min-h-[112px] w-full rounded-2xl border border-[#dbe3f0] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#1a73e8] focus:ring-2 focus:ring-[#e8f0fe]"
       />
     </label>
   );
@@ -163,11 +163,11 @@ export function SelectField<T extends string>({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-2 block text-sm font-medium text-[#3c4043]">{label}</span>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value as T)}
-        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+        className="w-full rounded-2xl border border-[#dbe3f0] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#1a73e8] focus:ring-2 focus:ring-[#e8f0fe]"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -189,8 +189,8 @@ export function ToggleField({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4">
-      <span className="text-sm font-medium text-slate-800">{label}</span>
+    <label className="flex items-center justify-between rounded-2xl border border-[#dbe3f0] bg-white px-4 py-3.5">
+      <span className="text-sm font-medium text-[#3c4043]">{label}</span>
       <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="h-5 w-5" />
     </label>
   );

@@ -435,9 +435,9 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen p-3 sm:p-5 lg:p-6">
+    <div className="min-h-screen p-2.5 sm:p-4 lg:p-5">
       {sidebarOpen ? <button type="button" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm lg:hidden" /> : null}
-      <div className={`mx-auto grid min-h-[calc(100vh-1.5rem)] max-w-[1720px] gap-4 lg:gap-5 ${sidebarCollapsed ? 'lg:grid-cols-[104px_minmax(0,1fr)]' : 'lg:grid-cols-[300px_minmax(0,1fr)]'}`}>
+      <div className={`mx-auto grid min-h-[calc(100vh-1rem)] max-w-[1600px] gap-3.5 lg:gap-4 ${sidebarCollapsed ? 'lg:grid-cols-[96px_minmax(0,1fr)]' : 'lg:grid-cols-[290px_minmax(0,1fr)]'}`}>
         <AdminSidebar
           tabs={tabs}
           activeTab={activeTab}
@@ -452,22 +452,22 @@ function App() {
 
         <main className="space-y-4 lg:space-y-5">
           <div className="flex items-center gap-3 lg:hidden">
-            <button type="button" onClick={() => setSidebarOpen(true)} className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm">
+            <button type="button" onClick={() => setSidebarOpen(true)} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#dbe3f0] bg-white text-[#3c4043] shadow-[0_1px_2px_rgba(60,64,67,0.08)]">
               <Menu className="h-5 w-5" />
             </button>
-            <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 shadow-sm">
+            <div className="min-w-0 rounded-2xl border border-[#dbe3f0] bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(60,64,67,0.08)]">
               <p className="truncate text-sm font-semibold text-slate-900">Connect Admin</p>
-              <p className="truncate text-xs text-slate-500">{tabs.find((item) => item.id === activeTab)?.label}</p>
+              <p className="truncate text-[11px] text-[#5f6368]">{tabs.find((item) => item.id === activeTab)?.label}</p>
             </div>
           </div>
 
-          <header className="flex flex-col gap-4 rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)] sm:flex-row sm:items-center sm:justify-between">
+          <header className="flex flex-col gap-3 rounded-[28px] border border-[#dbe3f0] bg-white p-4 shadow-[0_1px_2px_rgba(60,64,67,0.08)] sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-400">Workspace</p>
-              <h2 className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">
+              <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#5f6368]">Workspace</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#202124] sm:text-[1.75rem]">
                 {activeTab === 'overview' ? 'Operations overview' : activeTab === 'users' ? 'User command center' : `${tabs.find((item) => item.id === activeTab)?.label} management`}
               </h2>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-1.5 text-sm text-[#5f6368]">
                 {activeTab === 'users'
                   ? 'Open any user and manage their full footprint across the platform.'
                   : 'You can manage the product here while we keep improving both apps side by side.'}
@@ -476,7 +476,7 @@ function App() {
 
             <div className="flex flex-wrap gap-3">
               <button
-                className="hidden items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 lg:inline-flex"
+                className="hidden items-center gap-2 rounded-2xl border border-[#dbe3f0] px-4 py-2.5 text-sm font-medium text-[#3c4043] transition hover:bg-[#f8fafd] lg:inline-flex"
                 onClick={() => setSidebarCollapsed((prev) => !prev)}
                 type="button"
               >
@@ -484,7 +484,7 @@ function App() {
                 {sidebarCollapsed ? 'Expand nav' : 'Collapse nav'}
               </button>
               <button
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-2xl border border-[#dbe3f0] px-4 py-2.5 text-sm font-medium text-[#3c4043] transition hover:bg-[#f8fafd] disabled:opacity-60"
                 onClick={() => void refresh()}
                 type="button"
                 disabled={loadingData}
@@ -493,7 +493,7 @@ function App() {
                 Refresh
               </button>
               <button
-                className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                className="inline-flex items-center gap-2 rounded-2xl bg-[#1a73e8] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#1557b0]"
                 onClick={() => void handleSignOut()}
                 type="button"
               >
@@ -506,14 +506,14 @@ function App() {
           {error ? <ErrorBanner message={error} /> : null}
           {actionState ? <InfoBanner message={`${actionState}...`} /> : null}
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <MetricCard label="Users" value={snapshot.overview.totalUsers} hint={`${snapshot.overview.totalAdmins} admins in the system`} />
             <MetricCard label="Pending Partners" value={snapshot.overview.pendingPartners} hint="Waiting for approval" />
             <MetricCard label="Open Jobs" value={snapshot.overview.openJobs} hint="Currently visible gigs" />
             <MetricCard label="Market Items" value={snapshot.overview.marketItems} hint="Live marketplace listings" />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-3">
             <MetricCard label="Seller Ratings" value={snapshot.overview.marketSellerRatings} hint="Live trust signals from the market" />
             <MetricCard label="Company Follows" value={snapshot.overview.companyFollows} hint="Brand reach and audience movement" />
             <MetricCard label="Transaction Pins" value={snapshot.overview.transactionPins} hint="Accounts with transfer protection enabled" />
@@ -1157,31 +1157,31 @@ function SidebarStat({ label, value, compact }: { label: string; value: string |
 }
 
 function MetricCard({ label, value, hint }: { label: string; value: string | number; hint: string }) {
-  return <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)]"><p className="text-sm font-medium text-slate-500">{label}</p><p className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{value}</p><p className="mt-2 text-sm text-slate-500">{hint}</p></div>;
+  return <div className="rounded-3xl border border-[#dbe3f0] bg-white p-4 shadow-[0_1px_2px_rgba(60,64,67,0.08)]"><p className="text-xs font-medium uppercase tracking-[0.14em] text-[#5f6368]">{label}</p><p className="mt-2 text-2xl font-semibold tracking-tight text-[#202124]">{value}</p><p className="mt-1.5 text-xs leading-5 text-[#5f6368]">{hint}</p></div>;
 }
 
 function MiniMetric({ label, value }: { label: string; value: string | number }) {
-  return <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3"><p className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</p><p className="mt-2 text-lg font-semibold text-slate-900">{value}</p></div>;
+  return <div className="rounded-2xl border border-[#dbe3f0] bg-white px-3 py-2.5"><p className="text-[10px] uppercase tracking-[0.14em] text-[#5f6368]">{label}</p><p className="mt-1.5 text-base font-semibold text-[#202124]">{value}</p></div>;
 }
 
 function SectionCard({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
-  return <section className="rounded-[28px] border border-slate-200/80 bg-white/90 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.08)]"><div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">{title}</h2>{subtitle ? <p className="mt-1 text-sm text-slate-500">{subtitle}</p> : null}</div>{children}</section>;
+  return <section className="rounded-[28px] border border-[#dbe3f0] bg-white p-4 shadow-[0_1px_2px_rgba(60,64,67,0.08)] sm:p-5"><div className="mb-4"><h2 className="text-lg font-semibold text-[#202124]">{title}</h2>{subtitle ? <p className="mt-1 text-xs leading-5 text-[#5f6368]">{subtitle}</p> : null}</div>{children}</section>;
 }
 
 function AdminPanel({ title, subtitle, icon: Icon, children }: { title: string; subtitle: string; icon: typeof Users; children: ReactNode }) {
-  return <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-5"><div className="mb-5 flex items-start gap-4"><div className="rounded-2xl bg-white p-3 text-slate-700 shadow-sm"><Icon className="h-5 w-5" /></div><div><h3 className="text-lg font-semibold text-slate-900">{title}</h3><p className="mt-1 text-sm text-slate-500">{subtitle}</p></div></div>{children}</div>;
+  return <div className="rounded-[28px] border border-[#dbe3f0] bg-[#f8fafd] p-4"><div className="mb-4 flex items-start gap-3"><div className="rounded-2xl bg-[#e8f0fe] p-2.5 text-[#1967d2]"><Icon className="h-4 w-4" /></div><div><h3 className="text-base font-semibold text-[#202124]">{title}</h3><p className="mt-1 text-xs leading-5 text-[#5f6368]">{subtitle}</p></div></div>{children}</div>;
 }
 
 function HeroMetric({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string | number }) {
-  return <div className="rounded-3xl border border-white/10 bg-white/5 p-4"><div className="flex items-center gap-3"><div className="rounded-2xl bg-white/10 p-2.5 text-white"><Icon className="h-4 w-4" /></div><div><p className="text-xs uppercase tracking-[0.18em] text-slate-300">{label}</p><p className="mt-1 text-2xl font-semibold text-white">{value}</p></div></div></div>;
+  return <div className="rounded-3xl border border-[#dbe3f0] bg-white p-3.5"><div className="flex items-center gap-3"><div className="rounded-2xl bg-[#e8f0fe] p-2.5 text-[#1967d2]"><Icon className="h-4 w-4" /></div><div><p className="text-[10px] uppercase tracking-[0.14em] text-[#5f6368]">{label}</p><p className="mt-1 text-lg font-semibold text-[#202124]">{value}</p></div></div></div>;
 }
 
 function FootprintCard({ label, value, icon: Icon }: { label: string; value: string | number; icon: typeof Users }) {
-  return <div className="rounded-2xl border border-slate-200 bg-white p-4"><div className="flex items-center gap-3"><div className="rounded-2xl bg-slate-100 p-2.5 text-slate-700"><Icon className="h-4 w-4" /></div><div><p className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</p><p className="mt-1 text-xl font-semibold text-slate-900">{value}</p></div></div></div>;
+  return <div className="rounded-2xl border border-[#dbe3f0] bg-white p-3.5"><div className="flex items-center gap-3"><div className="rounded-2xl bg-[#e8f0fe] p-2.5 text-[#1967d2]"><Icon className="h-4 w-4" /></div><div><p className="text-[10px] uppercase tracking-[0.14em] text-[#5f6368]">{label}</p><p className="mt-1 text-lg font-semibold text-[#202124]">{value}</p></div></div></div>;
 }
 
 function BalanceCard({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-2xl border border-slate-200 bg-white p-4"><p className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</p><p className="mt-2 text-lg font-semibold text-slate-900">{value}</p></div>;
+  return <div className="rounded-2xl border border-[#dbe3f0] bg-white p-3.5"><p className="text-[10px] uppercase tracking-[0.14em] text-[#5f6368]">{label}</p><p className="mt-1.5 text-base font-semibold text-[#202124]">{value}</p></div>;
 }
 
 function LabeledInput({ label, value, onChange, hint }: { label: string; value: string; onChange: (value: string) => void; hint?: string }) {
@@ -1201,52 +1201,52 @@ function ToggleRow({ label, checked, onChange }: { label: string; checked: boole
 }
 
 function SoftMetaChip({ icon: Icon, text }: { icon: typeof Users; text: string }) {
-  return <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs text-slate-500 shadow-sm"><Icon className="h-3.5 w-3.5" />{text}</div>;
+  return <div className="inline-flex items-center gap-2 rounded-full border border-[#d2e3fc] bg-[#e8f0fe] px-3 py-1.5 text-[11px] text-[#1967d2]"><Icon className="h-3.5 w-3.5" />{text}</div>;
 }
 
 function ListBlock({ title, empty, items }: { title: string; empty: string; items: Array<{ id: string; title: string; subtitle: string; meta: string; actionLabel: string; onAction: () => void; secondaryLabel?: string; onSecondaryAction?: () => void }> }) {
-  return <div><h4 className="mb-3 text-sm font-semibold text-slate-900">{title}</h4><div className="space-y-3">{items.length === 0 ? <EmptyState body={empty} /> : null}{items.map((item) => <div key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4"><div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between"><div className="min-w-0"><p className="font-medium text-slate-900">{item.title}</p><p className="mt-1 text-sm leading-6 text-slate-500">{item.subtitle}</p><p className="mt-2 text-xs text-slate-400">{item.meta}</p></div><div className="flex flex-wrap gap-2"><ActionButton label={item.actionLabel} tone="light" onClick={item.onAction} />{item.secondaryLabel && item.onSecondaryAction ? <DangerButton label={item.secondaryLabel} onClick={item.onSecondaryAction} /> : null}</div></div></div>)}</div></div>;
+  return <div><h4 className="mb-3 text-sm font-semibold text-[#202124]">{title}</h4><div className="space-y-3">{items.length === 0 ? <EmptyState body={empty} /> : null}{items.map((item) => <div key={item.id} className="rounded-2xl border border-[#dbe3f0] bg-white p-3.5"><div className="flex flex-col gap-2.5 lg:flex-row lg:items-start lg:justify-between"><div className="min-w-0"><p className="text-sm font-medium text-[#202124]">{item.title}</p><p className="mt-1 text-sm leading-5 text-[#5f6368]">{item.subtitle}</p><p className="mt-2 text-[11px] text-[#80868b]">{item.meta}</p></div><div className="flex flex-wrap gap-2"><ActionButton label={item.actionLabel} tone="light" onClick={item.onAction} />{item.secondaryLabel && item.onSecondaryAction ? <DangerButton label={item.secondaryLabel} onClick={item.onSecondaryAction} /> : null}</div></div></div>)}</div></div>;
 }
 
 function CompactList({ items, empty }: { items: Array<{ id: string; title: string; subtitle: string; meta: string }>; empty: string }) {
-  return <div className="space-y-3">{items.length === 0 ? <EmptyState body={empty} /> : null}{items.map((item) => <div key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4"><p className="font-medium text-slate-900">{item.title}</p><p className="mt-1 text-sm leading-6 text-slate-500">{item.subtitle}</p><p className="mt-2 text-xs text-slate-400">{item.meta}</p></div>)}</div>;
+  return <div className="space-y-3">{items.length === 0 ? <EmptyState body={empty} /> : null}{items.map((item) => <div key={item.id} className="rounded-2xl border border-[#dbe3f0] bg-white p-3.5"><p className="text-sm font-medium text-[#202124]">{item.title}</p><p className="mt-1 text-sm leading-5 text-[#5f6368]">{item.subtitle}</p><p className="mt-2 text-[11px] text-[#80868b]">{item.meta}</p></div>)}</div>;
 }
 
 function Highlight({ title, body }: { title: string; body: string }) {
-  return <div className="rounded-3xl border border-white/10 bg-white/5 p-4"><p className="font-semibold text-white">{title}</p><p className="mt-2 text-sm leading-6 text-slate-300">{body}</p></div>;
+  return <div className="rounded-3xl border border-[#d2e3fc] bg-[#eef4ff] p-4"><p className="font-semibold text-[#174ea6]">{title}</p><p className="mt-2 text-sm leading-6 text-[#5f6368]">{body}</p></div>;
 }
 
 function FullScreenMessage({ title, body, action }: { title: string; body: string; action?: ReactNode }) {
-  return <div className="flex min-h-screen items-center justify-center p-6"><div className="w-full max-w-xl rounded-[32px] border border-slate-200/80 bg-white/92 p-8 text-center shadow-[0_24px_70px_rgba(15,23,42,0.12)]"><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-950 text-white"><ShieldCheck className="h-8 w-8" /></div><h1 className="mt-6 text-3xl font-semibold text-slate-900">{title}</h1><p className="mt-3 text-sm leading-7 text-slate-500">{body}</p>{action ? <div className="mt-6 flex justify-center">{action}</div> : null}</div></div>;
+  return <div className="flex min-h-screen items-center justify-center p-6"><div className="w-full max-w-xl rounded-[28px] border border-[#dbe3f0] bg-white p-7 text-center shadow-[0_8px_30px_rgba(60,64,67,0.12)]"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-[#e8f0fe] text-[#1967d2]"><ShieldCheck className="h-7 w-7" /></div><h1 className="mt-5 text-2xl font-semibold text-[#202124]">{title}</h1><p className="mt-3 text-sm leading-6 text-[#5f6368]">{body}</p>{action ? <div className="mt-6 flex justify-center">{action}</div> : null}</div></div>;
 }
 
 function ErrorBanner({ message }: { message: string }) {
-  return <div className="rounded-[24px] bg-rose-50 px-5 py-4 text-sm text-rose-700">{message}</div>;
+  return <div className="rounded-[22px] border border-[#f5c2c7] bg-[#fce8e6] px-4 py-3 text-sm text-[#b3261e]">{message}</div>;
 }
 
 function InfoBanner({ message }: { message: string }) {
-  return <div className="rounded-[24px] bg-amber-50 px-5 py-4 text-sm text-amber-800">{message}</div>;
+  return <div className="rounded-[22px] border border-[#d2e3fc] bg-[#e8f0fe] px-4 py-3 text-sm text-[#1967d2]">{message}</div>;
 }
 
 function EmptyState({ body }: { body: string }) {
-  return <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">{body}</div>;
+  return <div className="rounded-3xl border border-dashed border-[#dbe3f0] bg-[#f8fafd] px-5 py-8 text-center text-sm text-[#5f6368]">{body}</div>;
 }
 
 function StatusPill({ text, tone }: { text: string; tone: 'dark' | 'light' | 'success' | 'warning' | 'danger' | 'lightOnDark' }) {
-  const styles = tone === 'dark' ? 'bg-slate-950 text-white' : tone === 'success' ? 'bg-emerald-100 text-emerald-700' : tone === 'warning' ? 'bg-amber-100 text-amber-700' : tone === 'danger' ? 'bg-rose-100 text-rose-700' : tone === 'lightOnDark' ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-700';
-  return <span className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${styles}`}>{text}</span>;
+  const styles = tone === 'dark' ? 'bg-[#1a73e8] text-white' : tone === 'success' ? 'bg-[#e6f4ea] text-[#137333]' : tone === 'warning' ? 'bg-[#fef7e0] text-[#b06000]' : tone === 'danger' ? 'bg-[#fce8e6] text-[#b3261e]' : tone === 'lightOnDark' ? 'bg-[#e8f0fe] text-[#1967d2]' : 'bg-[#eef3fd] text-[#5f6368]';
+  return <span className={`rounded-full px-3 py-1 text-[11px] font-medium capitalize ${styles}`}>{text}</span>;
 }
 
 function ActionButton({ label, tone, onClick }: { label: string; tone: 'dark' | 'light'; onClick: () => void }) {
-  return <button className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${tone === 'dark' ? 'bg-slate-950 text-white hover:bg-slate-800' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-100'}`} onClick={onClick} type="button">{label}</button>;
+  return <button className={`rounded-2xl px-4 py-2.5 text-sm font-medium transition ${tone === 'dark' ? 'bg-[#1a73e8] text-white hover:bg-[#1557b0]' : 'border border-[#dbe3f0] bg-white text-[#3c4043] hover:bg-[#f8fafd]'}`} onClick={onClick} type="button">{label}</button>;
 }
 
 function DangerButton({ label, onClick }: { label: string; onClick: () => void }) {
-  return <button className="rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm font-medium text-rose-700 transition hover:bg-rose-50" onClick={onClick} type="button">{label}</button>;
+  return <button className="rounded-2xl border border-[#f5c2c7] bg-white px-4 py-2.5 text-sm font-medium text-[#b3261e] transition hover:bg-[#fce8e6]" onClick={onClick} type="button">{label}</button>;
 }
 
 function QuickList({ title, items }: { title: string; items: Array<{ title: string; subtitle: string; meta: string }> }) {
-  return <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4"><h3 className="font-semibold text-slate-900">{title}</h3><div className="mt-3 space-y-3">{items.length === 0 ? <p className="text-sm text-slate-500">Nothing recent here yet.</p> : null}{items.map((item, index) => <div key={`${item.title}-${index}`} className="flex items-start justify-between gap-3 rounded-2xl bg-white px-4 py-3"><div className="min-w-0"><p className="truncate font-medium text-slate-900">{item.title}</p><p className="truncate text-sm text-slate-500">{item.subtitle}</p></div><span className="shrink-0 text-xs text-slate-400">{item.meta}</span></div>)}</div></div>;
+  return <div className="rounded-3xl border border-[#dbe3f0] bg-[#f8fafd] p-4"><h3 className="font-semibold text-[#202124]">{title}</h3><div className="mt-3 space-y-3">{items.length === 0 ? <p className="text-sm text-[#5f6368]">Nothing recent here yet.</p> : null}{items.map((item, index) => <div key={`${item.title}-${index}`} className="flex items-start justify-between gap-3 rounded-2xl border border-[#dbe3f0] bg-white px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-medium text-[#202124]">{item.title}</p><p className="truncate text-sm text-[#5f6368]">{item.subtitle}</p></div><span className="shrink-0 text-[11px] text-[#80868b]">{item.meta}</span></div>)}</div></div>;
 }
 
 export default App;
