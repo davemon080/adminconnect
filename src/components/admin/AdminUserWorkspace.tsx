@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
-import { Activity, Building2, CreditCard, LayoutDashboard, Search, ShieldCheck, Store, UserRound, Wallet } from 'lucide-react';
+import { Activity, CreditCard, LayoutDashboard, Search, Store, UserRound, Wallet } from 'lucide-react';
 import {
   AdminMarketDraft,
   AdminPartnerRequest,
@@ -184,17 +184,14 @@ export default function AdminUserWorkspace({
                   <div className="mt-3 flex flex-wrap gap-2">
                     <InfoChip text={selectedUser.profile.role} />
                     <InfoChip text={selectedUser.marketSettings.isRegistered ? 'Market unlocked' : 'Market locked'} />
-                    <InfoChip text={selectedUser.hasTransactionPin ? 'Transaction pin enabled' : 'No transaction pin'} />
                   </div>
                 </div>
 
-                <div className="grid gap-2.5 sm:grid-cols-3 lg:grid-cols-2">
+                <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-2">
                   <MiniMetricDark label="Posts" value={selectedUser.metrics.posts} />
                   <MiniMetricDark label="Wallet txns" value={selectedUser.metrics.walletTransactions} />
                   <MiniMetricDark label="Messages" value={selectedUser.metrics.messages} />
                   <MiniMetricDark label="Connections" value={selectedUser.metrics.connections} />
-                  <MiniMetricDark label="Ratings" value={selectedUser.metrics.sellerRatings} />
-                  <MiniMetricDark label="Follows" value={selectedUser.metrics.companyFollows} />
                 </div>
               </div>
             </div>

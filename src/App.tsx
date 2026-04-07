@@ -448,6 +448,8 @@ function App() {
           sidebarOpen={sidebarOpen}
           sidebarCollapsed={sidebarCollapsed}
           setSidebarOpen={setSidebarOpen}
+          onSignOut={() => void handleSignOut()}
+          signingOut={actionState === 'Signing out'}
         />
 
         <main className="space-y-4 lg:space-y-5">
@@ -492,14 +494,6 @@ function App() {
                 <RefreshCw className={`h-4 w-4 ${loadingData ? 'animate-spin' : ''}`} />
                 Refresh
               </button>
-              <button
-                className="inline-flex items-center gap-2 rounded-2xl bg-[#1a73e8] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#1557b0]"
-                onClick={() => void handleSignOut()}
-                type="button"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </button>
             </div>
           </header>
 
@@ -511,12 +505,6 @@ function App() {
             <MetricCard label="Pending Partners" value={snapshot.overview.pendingPartners} hint="Waiting for approval" />
             <MetricCard label="Open Jobs" value={snapshot.overview.openJobs} hint="Currently visible gigs" />
             <MetricCard label="Market Items" value={snapshot.overview.marketItems} hint="Live marketplace listings" />
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-3">
-            <MetricCard label="Seller Ratings" value={snapshot.overview.marketSellerRatings} hint="Live trust signals from the market" />
-            <MetricCard label="Company Follows" value={snapshot.overview.companyFollows} hint="Brand reach and audience movement" />
-            <MetricCard label="Transaction Pins" value={snapshot.overview.transactionPins} hint="Accounts with transfer protection enabled" />
           </div>
 
           {activeTab === 'overview' ? (
