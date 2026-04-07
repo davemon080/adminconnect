@@ -127,6 +127,24 @@ export interface AdminMarketSettings {
   showBrandName: boolean;
 }
 
+export interface AdminCompanyFollowSummary {
+  id: string;
+  direction: 'followers' | 'following';
+  companyUid: string;
+  companyName: string;
+  createdAt: string;
+}
+
+export interface AdminSellerRatingSummary {
+  id: string;
+  sellerUid: string;
+  sellerName: string;
+  userUid: string;
+  userName: string;
+  rating: number;
+  createdAt: string;
+}
+
 export interface AdminMessageSummary {
   id: string;
   direction: 'sent' | 'received';
@@ -172,11 +190,14 @@ export interface AdminUserMetrics {
   messages: number;
   connections: number;
   pendingRequests: number;
+  companyFollows: number;
+  sellerRatings: number;
 }
 
 export interface AdminUserCommandCenter {
   profile: AdminUserProfile;
   wallet: AdminWallet | null;
+  hasTransactionPin: boolean;
   marketSettings: AdminMarketSettings;
   partnerRequest: AdminPartnerRequest | null;
   metrics: AdminUserMetrics;
@@ -189,6 +210,8 @@ export interface AdminUserCommandCenter {
   messages: AdminMessageSummary[];
   friendRequests: AdminFriendRequestSummary[];
   connections: AdminConnectionSummary[];
+  companyFollows: AdminCompanyFollowSummary[];
+  sellerRatings: AdminSellerRatingSummary[];
 }
 
 export interface AdminOverview {
@@ -200,6 +223,9 @@ export interface AdminOverview {
   posts: number;
   comments: number;
   walletTransactions: number;
+  marketSellerRatings: number;
+  companyFollows: number;
+  transactionPins: number;
 }
 
 export interface AdminSnapshot {

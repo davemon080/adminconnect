@@ -11,7 +11,10 @@ import {
   LogOut,
   Mail,
   MapPin,
+  Menu,
   MessageSquare,
+  PanelLeftClose,
+  PanelLeftOpen,
   PencilLine,
   Phone,
   RefreshCw,
@@ -23,6 +26,7 @@ import {
   UserRound,
   Users,
   Wallet,
+  X,
 } from 'lucide-react';
 import { adminService } from './services/adminService';
 import { supabase } from './supabase';
@@ -54,6 +58,9 @@ const emptySnapshot: AdminSnapshot = {
     posts: 0,
     comments: 0,
     walletTransactions: 0,
+    marketSellerRatings: 0,
+    companyFollows: 0,
+    transactionPins: 0,
   },
   users: [],
   partnerRequests: [],
@@ -152,6 +159,8 @@ function App() {
   const [walletAmount, setWalletAmount] = useState('');
   const [walletCurrency, setWalletCurrency] = useState<'USD' | 'NGN' | 'EUR'>('USD');
   const [walletNote, setWalletNote] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const pendingPartners = useMemo(
     () => snapshot.partnerRequests.filter((item) => item.status === 'pending'),
@@ -171,6 +180,19 @@ function App() {
       );
     });
   }, [snapshot.users, userSearch]);
+
+  const tabMeta = useMemo<Record<AdminTab, { count: number; accent: string }>>(
+    () => ({
+      overview: { count: snapshot.overview.totalUsers, accent: 'from-slate-900 to-cyan-900' },
+      users: { count: snapshot.users.length, accent: 'from-slate-900 to-slate-700' },
+      partners: { count: pendingPartners.length, accent: 'from-emerald-700 to-teal-700' },
+      jobs: { count: snapshot.jobs.length, accent: 'from-sky-700 to-cyan-700' },
+      market: { count: snapshot.marketItems.length, accent: 'from-amber-600 to-orange-600' },
+      feed: { count: snapshot.posts.length + snapshot.comments.length, accent: 'from-violet-700 to-fuchsia-700' },
+      wallet: { count: snapshot.walletTransactions.length, accent: 'from-rose-700 to-orange-700' },
+    }),
+    [pendingPartners.length, snapshot.comments.length, snapshot.jobs.length, snapshot.marketItems.length, snapshot.overview.totalUsers, snapshot.posts.length, snapshot.users.length, snapshot.walletTransactions.length]
+  );
 
   const refresh = async (uid = sessionUid) => {
     if (!uid) return;
@@ -277,6 +299,10 @@ function App() {
   useEffect(() => {
     if (activeTab !== 'users' || !selectedUserUid) return;
     void loadSelectedUser(selectedUserUid);
+  }, [activeTab, selectedUserUid]);
+
+  useEffect(() => {
+    setSidebarOpen(false);
   }, [activeTab, selectedUserUid]);
 
   const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
@@ -429,48 +455,101 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen p-4 sm:p-6">
-      <div className="mx-auto grid min-h-[calc(100vh-2rem)] max-w-[1680px] gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
-          <div className="rounded-[28px] bg-slate-950 p-5 text-white">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-amber-200">
-              <ShieldCheck className="h-4 w-4" />
-              Control Room
-            </div>
-            <h1 className="mt-4 text-2xl font-semibold">Connect Admin</h1>
-            <p className="mt-2 text-sm text-slate-300">Built to stay aligned with the user app as we keep shipping.</p>
-          </div>
-
-          <div className="mt-5 rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-            <div className="flex items-center gap-3">
-              <img src={adminProfile?.photoURL || 'https://placehold.co/80x80'} alt={adminProfile?.displayName || 'Admin'} className="h-12 w-12 rounded-2xl object-cover" />
+    <div className="min-h-screen p-3 sm:p-5 lg:p-6">
+      {sidebarOpen ? <button type="button" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm lg:hidden" /> : null}
+      <div className={`mx-auto grid min-h-[calc(100vh-1.5rem)] max-w-[1720px] gap-4 lg:gap-5 ${sidebarCollapsed ? 'lg:grid-cols-[104px_minmax(0,1fr)]' : 'lg:grid-cols-[300px_minmax(0,1fr)]'}`}>
+        <aside
+          className={`fixed inset-y-3 left-3 z-40 flex w-[min(88vw,320px)] flex-col rounded-[30px] border border-slate-200/80 bg-white/95 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur transition-transform duration-300 lg:sticky lg:top-6 lg:z-10 lg:h-[calc(100vh-3rem)] lg:w-auto lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-[110%]'} ${sidebarCollapsed ? 'lg:px-3' : 'lg:px-4'}`}
+        >
+          <div className={`rounded-[26px] bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.2),_transparent_28%),linear-gradient(160deg,#020617_0%,#0f172a_46%,#164e63_100%)] p-4 text-white ${sidebarCollapsed ? 'lg:px-3 lg:py-4' : 'lg:p-5'}`}>
+            <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate font-semibold text-slate-900">{adminProfile?.displayName || 'Admin user'}</p>
-                <p className="truncate text-sm text-slate-500">{adminProfile?.email || 'Signed in'}</p>
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-amber-200">
+                  <ShieldCheck className="h-4 w-4" />
+                  {!sidebarCollapsed ? 'Control Room' : 'Admin'}
+                </div>
+                <h1 className={`mt-4 font-semibold ${sidebarCollapsed ? 'lg:text-lg text-2xl' : 'text-2xl'}`}>Connect Admin</h1>
+                {!sidebarCollapsed ? <p className="mt-2 text-sm text-slate-300">Responsive control surface for the platform, tuned for both mobile and desktop operations.</p> : null}
               </div>
+              <button type="button" onClick={() => setSidebarOpen(false)} className="rounded-2xl p-2 text-white/80 hover:bg-white/10 lg:hidden">
+                <X className="h-5 w-5" />
+              </button>
             </div>
           </div>
 
-          <nav className="mt-5 space-y-2">
+          <div className={`mt-4 rounded-[24px] border border-slate-200 bg-slate-50 p-4 ${sidebarCollapsed ? 'lg:px-3' : ''}`}>
+            <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'lg:flex-col lg:text-center' : ''}`}>
+              <img src={adminProfile?.photoURL || 'https://placehold.co/80x80'} alt={adminProfile?.displayName || 'Admin'} className="h-12 w-12 rounded-2xl object-cover" />
+              {!sidebarCollapsed ? (
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-slate-900">{adminProfile?.displayName || 'Admin user'}</p>
+                  <p className="truncate text-sm text-slate-500">{adminProfile?.email || 'Signed in'}</p>
+                </div>
+              ) : (
+                <div className="hidden lg:block">
+                  <p className="text-xs font-semibold text-slate-900">Admin</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className={`mt-4 grid gap-3 ${sidebarCollapsed ? 'lg:grid-cols-1' : 'grid-cols-2'}`}>
+            <SidebarStat label="Users" value={snapshot.overview.totalUsers} compact={sidebarCollapsed} />
+            <SidebarStat label="Approvals" value={pendingPartners.length} compact={sidebarCollapsed} />
+          </div>
+
+          <nav className="mt-4 flex-1 space-y-2 overflow-y-auto pr-1">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const active = tab.id === activeTab;
+              const meta = tabMeta[tab.id];
               return (
                 <button
                   key={tab.id}
-                  className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium transition ${active ? 'bg-slate-950 text-white' : 'bg-transparent text-slate-700 hover:bg-slate-100'}`}
+                  className={`group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium transition ${active ? 'bg-slate-950 text-white shadow-[0_16px_40px_rgba(15,23,42,0.22)]' : 'bg-transparent text-slate-700 hover:bg-slate-100'}`}
                   onClick={() => setActiveTab(tab.id)}
                   type="button"
+                  title={sidebarCollapsed ? tab.label : undefined}
                 >
-                  <Icon className="h-4 w-4" />
-                  {tab.label}
+                  <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${active ? 'from-white/18 to-white/5 text-white' : `${meta.accent} text-white`}`}>
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  {!sidebarCollapsed ? (
+                    <>
+                      <span className="min-w-0 flex-1 truncate">{tab.label}</span>
+                      <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${active ? 'bg-white/12 text-white' : 'bg-slate-200 text-slate-700'}`}>{meta.count}</span>
+                    </>
+                  ) : null}
                 </button>
               );
             })}
           </nav>
+
+          <div className={`mt-4 rounded-[24px] border border-slate-200 bg-slate-50 p-4 ${sidebarCollapsed ? 'lg:px-3' : ''}`}>
+            {!sidebarCollapsed ? (
+              <>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Sync status</p>
+                <p className="mt-2 text-sm text-slate-600">The admin app is watching the main app tables in realtime so moderation and approvals stay current.</p>
+              </>
+            ) : (
+              <div className="hidden lg:flex lg:justify-center">
+                <Activity className="h-5 w-5 text-slate-500" />
+              </div>
+            )}
+          </div>
         </aside>
 
-        <main className="space-y-5">
+        <main className="space-y-4 lg:space-y-5">
+          <div className="flex items-center gap-3 lg:hidden">
+            <button type="button" onClick={() => setSidebarOpen(true)} className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm">
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="min-w-0 rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 shadow-sm">
+              <p className="truncate text-sm font-semibold text-slate-900">Connect Admin</p>
+              <p className="truncate text-xs text-slate-500">{tabs.find((item) => item.id === activeTab)?.label}</p>
+            </div>
+          </div>
+
           <header className="flex flex-col gap-4 rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)] sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-400">Workspace</p>
@@ -485,6 +564,14 @@ function App() {
             </div>
 
             <div className="flex flex-wrap gap-3">
+              <button
+                className="hidden items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 lg:inline-flex"
+                onClick={() => setSidebarCollapsed((prev) => !prev)}
+                type="button"
+              >
+                {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+                {sidebarCollapsed ? 'Expand nav' : 'Collapse nav'}
+              </button>
               <button
                 className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-60"
                 onClick={() => void refresh()}
@@ -513,6 +600,12 @@ function App() {
             <MetricCard label="Pending Partners" value={snapshot.overview.pendingPartners} hint="Waiting for approval" />
             <MetricCard label="Open Jobs" value={snapshot.overview.openJobs} hint="Currently visible gigs" />
             <MetricCard label="Market Items" value={snapshot.overview.marketItems} hint="Live marketplace listings" />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <MetricCard label="Seller Ratings" value={snapshot.overview.marketSellerRatings} hint="Live trust signals from the market" />
+            <MetricCard label="Company Follows" value={snapshot.overview.companyFollows} hint="Brand reach and audience movement" />
+            <MetricCard label="Transaction Pins" value={snapshot.overview.transactionPins} hint="Accounts with transfer protection enabled" />
           </div>
 
           {activeTab === 'overview' ? (
@@ -873,6 +966,8 @@ function UserCommandCenter({
                   <HeroMetric icon={MessageSquare} label="Messages" value={selectedUser.metrics.messages} />
                   <HeroMetric icon={Store} label="Market items" value={selectedUser.metrics.marketItems} />
                   <HeroMetric icon={Wallet} label="Wallet txns" value={selectedUser.metrics.walletTransactions} />
+                  <HeroMetric icon={Sparkles} label="Seller ratings" value={selectedUser.metrics.sellerRatings} />
+                  <HeroMetric icon={Building2} label="Company follows" value={selectedUser.metrics.companyFollows} />
                 </div>
               </div>
             </div>
@@ -921,6 +1016,7 @@ function UserCommandCenter({
                 <div className="mt-5 flex flex-wrap gap-3">
                   <ActionButton label="Apply wallet adjustment" tone="dark" onClick={onApplyWalletAdjustment} />
                   <SoftMetaChip icon={RefreshCw} text={selectedUser.wallet ? `Updated ${formatDate(selectedUser.wallet.updatedAt)}` : 'Wallet will be created on first adjustment'} />
+                  <SoftMetaChip icon={ShieldCheck} text={selectedUser.hasTransactionPin ? 'Transaction pin active' : 'No transaction pin yet'} />
                 </div>
               </AdminPanel>
             </div>
@@ -1043,6 +1139,9 @@ function UserCommandCenter({
                   <FootprintCard label="Proposals" value={selectedUser.metrics.proposals} icon={ArrowRight} />
                   <FootprintCard label="Connections" value={selectedUser.metrics.connections} icon={UserRound} />
                   <FootprintCard label="Pending requests" value={selectedUser.metrics.pendingRequests} icon={Activity} />
+                  <FootprintCard label="Company follows" value={selectedUser.metrics.companyFollows} icon={Building2} />
+                  <FootprintCard label="Seller ratings" value={selectedUser.metrics.sellerRatings} icon={Sparkles} />
+                  <FootprintCard label="Transfer pin" value={selectedUser.hasTransactionPin ? 'Enabled' : 'Not set'} icon={ShieldCheck} />
                   <FootprintCard
                     label="Market live"
                     value={
@@ -1095,6 +1194,32 @@ function UserCommandCenter({
                 </div>
               </AdminPanel>
             </div>
+
+            <div className="grid gap-5 xl:grid-cols-2">
+              <AdminPanel title="Company follows" subtitle="How this account connects to company discovery and brand reach." icon={Building2}>
+                <CompactList
+                  empty="No company follow activity yet."
+                  items={selectedUser.companyFollows.map((follow) => ({
+                    id: follow.id,
+                    title: `${follow.direction === 'followers' ? 'Followed by' : 'Following'} ${follow.companyName}`,
+                    subtitle: follow.companyUid,
+                    meta: formatDate(follow.createdAt),
+                  }))}
+                />
+              </AdminPanel>
+
+              <AdminPanel title="Seller ratings" subtitle="Marketplace trust history tied to this account." icon={Sparkles}>
+                <CompactList
+                  empty="No market seller ratings recorded for this user yet."
+                  items={selectedUser.sellerRatings.map((rating) => ({
+                    id: rating.id,
+                    title: `${rating.rating}/5 ${rating.sellerUid === selectedUser.profile.uid ? 'received from' : 'given to'} ${rating.sellerUid === selectedUser.profile.uid ? rating.userName : rating.sellerName}`,
+                    subtitle: rating.sellerUid === selectedUser.profile.uid ? `Seller: ${rating.sellerName}` : `Buyer: ${rating.userName}`,
+                    meta: formatDate(rating.createdAt),
+                  }))}
+                />
+              </AdminPanel>
+            </div>
           </div>
         )}
       </SectionCard>
@@ -1108,6 +1233,15 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <span className="mb-2 block text-sm font-medium text-slate-700">{label}</span>
       {children}
     </label>
+  );
+}
+
+function SidebarStat({ label, value, compact }: { label: string; value: string | number; compact?: boolean }) {
+  return (
+    <div className={`rounded-2xl border border-slate-200 bg-white ${compact ? 'px-2 py-3 text-center' : 'px-3 py-3'}`}>
+      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">{compact ? label.slice(0, 4) : label}</p>
+      <p className={`mt-2 font-semibold text-slate-900 ${compact ? 'text-base' : 'text-lg'}`}>{value}</p>
+    </div>
   );
 }
 

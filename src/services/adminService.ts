@@ -18,6 +18,8 @@ import {
   AdminWalletTransaction,
   AdminConnectionSummary,
   AdminFriendRequestSummary,
+  AdminCompanyFollowSummary,
+  AdminSellerRatingSummary,
 } from '../types';
 
 type DbAdminUserProfile = {
@@ -160,6 +162,21 @@ type DbAdminFriendRequest = {
 type DbAdminConnection = {
   id: string;
   uids: string[];
+  created_at: string;
+};
+
+type DbAdminCompanyFollow = {
+  id: string;
+  company_uid: string;
+  follower_uid: string;
+  created_at: string;
+};
+
+type DbAdminSellerRating = {
+  id: string;
+  seller_uid: string;
+  user_uid: string;
+  rating: number;
   created_at: string;
 };
 
@@ -421,6 +438,9 @@ export const adminService = {
         getCount('posts'),
         getCount('post_comments'),
         getCount('wallet_transactions'),
+        getCount('market_seller_ratings'),
+        getCount('company_follows'),
+        getCount('wallet_security'),
       ]),
       runQuery<DbAdminUserProfile[]>(
         supabase
@@ -464,7 +484,7 @@ export const adminService = {
       ),
     ]);
 
-    const [totalUsers, totalAdmins, pendingPartners, openJobs, totalMarketItems, totalPosts, totalComments, totalWalletTransactions] =
+    const [totalUsers, totalAdmins, pendingPartners, openJobs, totalMarketItems, totalPosts, totalComments, totalWalletTransactions, totalMarketSellerRatings, totalCompanyFollows, totalTransactionPins] =
       overviewCounts;
 
     return {
@@ -477,6 +497,9 @@ export const adminService = {
         posts: totalPosts,
         comments: totalComments,
         walletTransactions: totalWalletTransactions,
+        marketSellerRatings: totalMarketSellerRatings,
+        companyFollows: totalCompanyFollows,
+        transactionPins: totalTransactionPins,
       },
       users: users.map(mapUser),
       partnerRequests: partnerRequests.map(mapPartnerRequest),
@@ -492,6 +515,7 @@ export const adminService = {
     const [
       profileRow,
       walletRow,
+      walletSecurityRow,
       marketSettingsRow,
       partnerRequestRow,
       postsRows,
@@ -503,6 +527,8 @@ export const adminService = {
       messageRows,
       friendRequestRows,
       connectionRows,
+      companyFollowRows,
+      sellerRatingRows,
     ] = await Promise.all([
       runQuery<DbAdminUserProfile | null>(
         supabase
@@ -513,6 +539,10 @@ export const adminService = {
         'load user profile'
       ),
       runQuery<DbAdminWallet | null>(supabase.from('wallets').select('*').eq('user_uid', uid).maybeSingle(), 'load user wallet'),
+      runQuery<{ user_uid: string } | null>(
+        supabase.from('wallet_security').select('user_uid').eq('user_uid', uid).maybeSingle(),
+        'load wallet security'
+      ),
       runQuery<DbAdminMarketSettings | null>(
         supabase.from('market_settings').select('*').eq('user_uid', uid).maybeSingle(),
         'load market settings'
@@ -577,6 +607,24 @@ export const adminService = {
         supabase.from('connections').select('id,uids,created_at').contains('uids', [uid]).order('created_at', { ascending: false }).limit(20),
         'load user connections'
       ),
+      runQuery<DbAdminCompanyFollow[]>(
+        supabase
+          .from('company_follows')
+          .select('id,company_uid,follower_uid,created_at')
+          .or(`company_uid.eq.${uid},follower_uid.eq.${uid}`)
+          .order('created_at', { ascending: false })
+          .limit(20),
+        'load company follows'
+      ),
+      runQuery<DbAdminSellerRating[]>(
+        supabase
+          .from('market_seller_ratings')
+          .select('id,seller_uid,user_uid,rating,created_at')
+          .or(`seller_uid.eq.${uid},user_uid.eq.${uid}`)
+          .order('created_at', { ascending: false })
+          .limit(20),
+        'load market seller ratings'
+      ),
     ]);
 
     if (!profileRow) {
@@ -588,6 +636,14 @@ export const adminService = {
     messageRows.forEach((message) => relatedUserIds.add(message.sender_uid === uid ? message.receiver_uid : message.sender_uid));
     friendRequestRows.forEach((request) => relatedUserIds.add(request.from_uid === uid ? request.to_uid : request.from_uid));
     connectionRows.forEach((connection) => connection.uids.filter((item) => item !== uid).forEach((item) => relatedUserIds.add(item)));
+    companyFollowRows.forEach((follow) => {
+      relatedUserIds.add(follow.company_uid);
+      relatedUserIds.add(follow.follower_uid);
+    });
+    sellerRatingRows.forEach((rating) => {
+      relatedUserIds.add(rating.seller_uid);
+      relatedUserIds.add(rating.user_uid);
+    });
     const relatedUsers = await fetchUsersByUids(Array.from(relatedUserIds));
 
     const messages: AdminMessageSummary[] = messageRows.map((message) => {
@@ -625,6 +681,28 @@ export const adminService = {
       };
     });
 
+    const companyFollows: AdminCompanyFollowSummary[] = companyFollowRows.map((follow) => {
+      const direction = follow.company_uid === uid ? 'followers' : 'following';
+      const companyUid = follow.company_uid;
+      return {
+        id: String(follow.id),
+        direction,
+        companyUid,
+        companyName: relatedUsers.get(companyUid)?.displayName || relatedUsers.get(companyUid)?.companyInfo?.name || 'Unknown company',
+        createdAt: follow.created_at,
+      };
+    });
+
+    const sellerRatings: AdminSellerRatingSummary[] = sellerRatingRows.map((rating) => ({
+      id: String(rating.id),
+      sellerUid: rating.seller_uid,
+      sellerName: relatedUsers.get(rating.seller_uid)?.displayName || 'Unknown seller',
+      userUid: rating.user_uid,
+      userName: relatedUsers.get(rating.user_uid)?.displayName || 'Unknown user',
+      rating: rating.rating,
+      createdAt: rating.created_at,
+    }));
+
     const metrics: AdminUserMetrics = {
       posts: postsRows.length,
       comments: commentsRows.length,
@@ -635,11 +713,14 @@ export const adminService = {
       messages: messageRows.length,
       connections: connectionRows.length,
       pendingRequests: friendRequestRows.filter((request) => request.status === 'pending').length,
+      companyFollows: companyFollowRows.length,
+      sellerRatings: sellerRatingRows.length,
     };
 
     return {
       profile,
       wallet: walletRow ? mapWallet(walletRow) : null,
+      hasTransactionPin: Boolean(walletSecurityRow),
       marketSettings: mapMarketSettings(marketSettingsRow, uid),
       partnerRequest: partnerRequestRow ? mapPartnerRequest(partnerRequestRow) : null,
       metrics,
@@ -652,11 +733,13 @@ export const adminService = {
       messages,
       friendRequests,
       connections,
+      companyFollows,
+      sellerRatings,
     };
   },
 
   subscribeToAdminChanges(onChange: () => void) {
-    const tables = ['users', 'company_partner_requests', 'jobs', 'market_items', 'posts', 'post_comments', 'wallet_transactions', 'wallets', 'market_settings', 'proposals', 'messages', 'friend_requests', 'connections'];
+    const tables = ['users', 'company_partner_requests', 'jobs', 'market_items', 'posts', 'post_comments', 'wallet_transactions', 'wallets', 'market_settings', 'proposals', 'messages', 'friend_requests', 'connections', 'wallet_security', 'company_follows', 'market_seller_ratings'];
     const channels = tables.map((table) =>
       supabase.channel(`admin-watch:${table}`).on('postgres_changes', { event: '*', schema: 'public', table }, onChange).subscribe()
     );
