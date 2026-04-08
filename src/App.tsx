@@ -4,9 +4,11 @@ import {
   Activity,
   ArrowRight,
   BadgeCheck,
+  BellRing,
   BriefcaseBusiness,
   Building2,
   CreditCard,
+  Flag,
   LayoutDashboard,
   LogOut,
   Mail,
@@ -34,6 +36,7 @@ import {
   AdminSnapshot,
   AdminTab,
   AdminMarketDraft,
+  AdminNotificationDraft,
   AdminUserCommandCenter,
   AdminUserProfile,
   AdminUserProfileDraft,
@@ -41,6 +44,8 @@ import {
 } from './types';
 import AdminSidebar from './components/admin/AdminSidebar';
 import AdminUserWorkspace from './components/admin/AdminUserWorkspace';
+import AdminNotificationsPanel from './components/admin/AdminNotificationsPanel';
+import AdminUserReportsPanel from './components/admin/AdminUserReportsPanel';
 
 const tabs: Array<{ id: AdminTab; label: string; icon: typeof LayoutDashboard }> = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -50,6 +55,8 @@ const tabs: Array<{ id: AdminTab; label: string; icon: typeof LayoutDashboard }>
   { id: 'market', label: 'Market', icon: Store },
   { id: 'feed', label: 'Feed', icon: Trash2 },
   { id: 'wallet', label: 'Wallet', icon: CreditCard },
+  { id: 'notifications', label: 'Notifications', icon: BellRing },
+  { id: 'reports', label: 'Reports', icon: Flag },
 ];
 
 const emptySnapshot: AdminSnapshot = {
@@ -65,6 +72,8 @@ const emptySnapshot: AdminSnapshot = {
     marketSellerRatings: 0,
     companyFollows: 0,
     transactionPins: 0,
+    pendingReports: 0,
+    activeAnnouncements: 0,
   },
   users: [],
   partnerRequests: [],
@@ -73,6 +82,8 @@ const emptySnapshot: AdminSnapshot = {
   posts: [],
   comments: [],
   walletTransactions: [],
+  notifications: [],
+  userReports: [],
 };
 
 function formatDate(value?: string) {
@@ -141,6 +152,14 @@ function App() {
   const [walletNote, setWalletNote] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [notificationDraft, setNotificationDraft] = useState<AdminNotificationDraft>({
+    audience: 'general',
+    targetUid: '',
+    title: '',
+    body: '',
+    link: '',
+    deliveryMode: 'notification',
+  });
 
   const pendingPartners = useMemo(
     () => snapshot.partnerRequests.filter((item) => item.status === 'pending'),
@@ -170,8 +189,10 @@ function App() {
       market: { count: snapshot.marketItems.length, accent: 'from-amber-600 to-orange-600' },
       feed: { count: snapshot.posts.length + snapshot.comments.length, accent: 'from-violet-700 to-fuchsia-700' },
       wallet: { count: snapshot.walletTransactions.length, accent: 'from-rose-700 to-orange-700' },
+      notifications: { count: snapshot.overview.activeAnnouncements, accent: 'from-teal-700 to-cyan-700' },
+      reports: { count: snapshot.overview.pendingReports, accent: 'from-red-700 to-rose-700' },
     }),
-    [pendingPartners.length, snapshot.comments.length, snapshot.jobs.length, snapshot.marketItems.length, snapshot.overview.totalUsers, snapshot.posts.length, snapshot.users.length, snapshot.walletTransactions.length]
+    [pendingPartners.length, snapshot.comments.length, snapshot.jobs.length, snapshot.marketItems.length, snapshot.overview.activeAnnouncements, snapshot.overview.pendingReports, snapshot.overview.totalUsers, snapshot.posts.length, snapshot.users.length, snapshot.walletTransactions.length]
   );
 
   const refresh = async (uid = sessionUid) => {
@@ -377,6 +398,36 @@ function App() {
     });
   };
 
+  const handleCreateAdminNotification = async () => {
+    if (!sessionUid) return;
+    await runAction('Sending notification', async () => {
+      await adminService.createAdminNotification(sessionUid, notificationDraft);
+      setNotificationDraft({
+        audience: 'general',
+        targetUid: '',
+        title: '',
+        body: '',
+        link: '',
+        deliveryMode: 'notification',
+      });
+    });
+  };
+
+  const handleDeactivateAdminNotification = async (id: string) => {
+    await runAction('Closing notification', async () => {
+      await adminService.deactivateAdminNotification(id);
+    });
+  };
+
+  const handleUpdateReportStatus = async (
+    report: AdminSnapshot['userReports'][number],
+    status: AdminSnapshot['userReports'][number]['status']
+  ) => {
+    await runAction('Updating report', async () => {
+      await adminService.updateUserReportStatus(report.id, status, report.adminNote);
+    });
+  };
+
   if (loadingAuth) {
     return <FullScreenMessage title="Opening Connect Admin" body="Checking your session and preparing the dashboard." />;
   }
@@ -506,6 +557,13 @@ function App() {
             <MetricCard label="Open Jobs" value={snapshot.overview.openJobs} hint="Currently visible gigs" />
             <MetricCard label="Market Items" value={snapshot.overview.marketItems} hint="Live marketplace listings" />
           </div>
+
+          {(activeTab === 'notifications' || activeTab === 'reports') && (
+            <div className="grid gap-3 md:grid-cols-2">
+              <MetricCard label="Active Notifications" value={snapshot.overview.activeAnnouncements} hint="Still visible to users" />
+              <MetricCard label="Pending Reports" value={snapshot.overview.pendingReports} hint="Waiting for admin action" />
+            </div>
+          )}
 
           {activeTab === 'overview' ? (
             <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
@@ -704,6 +762,25 @@ function App() {
                 }))}
               />
             </SectionCard>
+          ) : null}
+
+          {activeTab === 'notifications' ? (
+            <AdminNotificationsPanel
+              draft={notificationDraft}
+              setDraft={setNotificationDraft}
+              users={snapshot.users}
+              notifications={snapshot.notifications}
+              onCreate={handleCreateAdminNotification}
+              onDeactivate={handleDeactivateAdminNotification}
+              busy={actionState === 'Sending notification' || actionState === 'Closing notification'}
+            />
+          ) : null}
+
+          {activeTab === 'reports' ? (
+            <AdminUserReportsPanel
+              reports={snapshot.userReports}
+              onUpdateStatus={handleUpdateReportStatus}
+            />
           ) : null}
         </main>
       </div>

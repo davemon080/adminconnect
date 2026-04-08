@@ -34,6 +34,8 @@ export default function AdminSidebar({
     market: 0,
     feed: 0,
     wallet: 0,
+    notifications: 0,
+    reports: 0,
   };
 
   return (

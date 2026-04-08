@@ -19,7 +19,10 @@ import {
   AdminConnectionSummary,
   AdminFriendRequestSummary,
   AdminCompanyFollowSummary,
+  AdminAnnouncement,
+  AdminNotificationDraft,
   AdminSellerRatingSummary,
+  AdminUserReport,
 } from '../types';
 
 type DbAdminUserProfile = {
@@ -180,6 +183,30 @@ type DbAdminSellerRating = {
   created_at: string;
 };
 
+type DbAdminAnnouncement = {
+  id: string;
+  created_by: string;
+  target_uid?: string | null;
+  title: string;
+  body: string;
+  link?: string | null;
+  delivery_mode: 'notification' | 'popup' | 'both';
+  is_active: boolean;
+  created_at: string;
+};
+
+type DbAdminUserReport = {
+  id: string;
+  reporter_uid: string;
+  reported_uid: string;
+  reason: string;
+  details?: string | null;
+  status: 'pending' | 'reviewing' | 'resolved' | 'dismissed';
+  admin_note?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+};
+
 function mapUser(row: DbAdminUserProfile): AdminUserProfile {
   return {
     uid: row.uid,
@@ -334,6 +361,37 @@ function mapProposal(row: DbAdminProposal): AdminProposal {
   };
 }
 
+function mapAnnouncement(row: DbAdminAnnouncement, userNameByUid?: Map<string, AdminUserProfile>): AdminAnnouncement {
+  return {
+    id: row.id,
+    createdBy: row.created_by,
+    targetUid: row.target_uid || undefined,
+    targetUserName: row.target_uid ? userNameByUid?.get(row.target_uid)?.displayName : undefined,
+    title: row.title,
+    body: row.body,
+    link: row.link || undefined,
+    deliveryMode: row.delivery_mode,
+    isActive: row.is_active,
+    createdAt: row.created_at,
+  };
+}
+
+function mapUserReport(row: DbAdminUserReport, usersByUid?: Map<string, AdminUserProfile>): AdminUserReport {
+  return {
+    id: row.id,
+    reporterUid: row.reporter_uid,
+    reporterName: usersByUid?.get(row.reporter_uid)?.displayName || 'Unknown reporter',
+    reportedUid: row.reported_uid,
+    reportedName: usersByUid?.get(row.reported_uid)?.displayName || 'Unknown user',
+    reason: row.reason,
+    details: row.details || undefined,
+    status: row.status,
+    adminNote: row.admin_note || undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at || undefined,
+  };
+}
+
 async function runQuery<T>(promise: any, context: string): Promise<T> {
   const { data, error } = await promise;
   if (error) {
@@ -428,7 +486,7 @@ export const adminService = {
   },
 
   async getSnapshot(): Promise<AdminSnapshot> {
-    const [overviewCounts, users, partnerRequests, jobs, marketItems, posts, comments, walletTransactions] = await Promise.all([
+    const [overviewCounts, users, partnerRequests, jobs, marketItems, posts, comments, walletTransactions, notifications, userReports] = await Promise.all([
       Promise.all([
         getCount('users'),
         getCount('users', (query) => query.eq('role', 'admin')),
@@ -441,6 +499,8 @@ export const adminService = {
         getCount('market_seller_ratings'),
         getCount('company_follows'),
         getCount('wallet_security'),
+        getCount('user_reports', (query) => query.eq('status', 'pending')),
+        getCount('admin_notifications', (query) => query.eq('is_active', true)),
       ]),
       runQuery<DbAdminUserProfile[]>(
         supabase
@@ -482,10 +542,26 @@ export const adminService = {
           .limit(50),
         'load wallet transactions'
       ),
+      runQuery<DbAdminAnnouncement[]>(
+        supabase.from('admin_notifications').select('*').order('created_at', { ascending: false }).limit(50),
+        'load admin notifications'
+      ),
+      runQuery<DbAdminUserReport[]>(
+        supabase.from('user_reports').select('*').order('created_at', { ascending: false }).limit(50),
+        'load user reports'
+      ),
     ]);
 
-    const [totalUsers, totalAdmins, pendingPartners, openJobs, totalMarketItems, totalPosts, totalComments, totalWalletTransactions, totalMarketSellerRatings, totalCompanyFollows, totalTransactionPins] =
+    const [totalUsers, totalAdmins, pendingPartners, openJobs, totalMarketItems, totalPosts, totalComments, totalWalletTransactions, totalMarketSellerRatings, totalCompanyFollows, totalTransactionPins, pendingReports, activeAnnouncements] =
       overviewCounts;
+
+    const relatedUserIds = Array.from(
+      new Set([
+        ...notifications.map((item) => item.target_uid).filter((value): value is string => !!value),
+        ...userReports.flatMap((item) => [item.reporter_uid, item.reported_uid]),
+      ])
+    );
+    const relatedUsers = await fetchUsersByUids(relatedUserIds);
 
     return {
       overview: {
@@ -500,6 +576,8 @@ export const adminService = {
         marketSellerRatings: totalMarketSellerRatings,
         companyFollows: totalCompanyFollows,
         transactionPins: totalTransactionPins,
+        pendingReports,
+        activeAnnouncements,
       },
       users: users.map(mapUser),
       partnerRequests: partnerRequests.map(mapPartnerRequest),
@@ -508,6 +586,8 @@ export const adminService = {
       posts: posts.map(mapPost),
       comments: comments.map(mapComment),
       walletTransactions: walletTransactions.map(mapWalletTransaction),
+      notifications: notifications.map((item) => mapAnnouncement(item, relatedUsers)),
+      userReports: userReports.map((item) => mapUserReport(item, relatedUsers)),
     };
   },
 
@@ -739,7 +819,7 @@ export const adminService = {
   },
 
   subscribeToAdminChanges(onChange: () => void) {
-    const tables = ['users', 'company_partner_requests', 'jobs', 'market_items', 'posts', 'post_comments', 'wallet_transactions', 'wallets', 'market_settings', 'proposals', 'messages', 'friend_requests', 'connections', 'wallet_security', 'company_follows', 'market_seller_ratings'];
+    const tables = ['users', 'company_partner_requests', 'jobs', 'market_items', 'posts', 'post_comments', 'wallet_transactions', 'wallets', 'market_settings', 'proposals', 'messages', 'friend_requests', 'connections', 'wallet_security', 'company_follows', 'market_seller_ratings', 'admin_notifications', 'user_reports'];
     const channels = tables.map((table) =>
       supabase.channel(`admin-watch:${table}`).on('postgres_changes', { event: '*', schema: 'public', table }, onChange).subscribe()
     );
@@ -900,6 +980,50 @@ export const adminService = {
           { onConflict: 'user_uid' }
         ),
       'update marketplace access'
+    );
+  },
+
+  async createAdminNotification(adminUid: string, draft: AdminNotificationDraft) {
+    if (!draft.title.trim() || !draft.body.trim()) {
+      throw new Error('Title and message are required.');
+    }
+    if (draft.audience === 'individual' && !draft.targetUid) {
+      throw new Error('Choose a user for an individual notification.');
+    }
+
+    await runQuery(
+      supabase.from('admin_notifications').insert({
+        created_by: adminUid,
+        target_uid: draft.audience === 'individual' ? draft.targetUid : null,
+        title: draft.title.trim(),
+        body: draft.body.trim(),
+        link: draft.link.trim() || null,
+        delivery_mode: draft.deliveryMode,
+        is_active: true,
+        created_at: new Date().toISOString(),
+      }),
+      'create admin notification'
+    );
+  },
+
+  async deactivateAdminNotification(id: string) {
+    await runQuery(
+      supabase.from('admin_notifications').update({ is_active: false }).eq('id', id),
+      'deactivate admin notification'
+    );
+  },
+
+  async updateUserReportStatus(id: string, status: AdminUserReport['status'], adminNote?: string) {
+    await runQuery(
+      supabase
+        .from('user_reports')
+        .update({
+          status,
+          admin_note: adminNote?.trim() || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id),
+      'update user report status'
     );
   },
 };

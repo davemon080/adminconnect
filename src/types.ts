@@ -1,4 +1,4 @@
-export type AdminTab = 'overview' | 'users' | 'partners' | 'jobs' | 'market' | 'feed' | 'wallet';
+export type AdminTab = 'overview' | 'users' | 'partners' | 'jobs' | 'market' | 'feed' | 'wallet' | 'notifications' | 'reports';
 
 export type AdminUserRole = 'freelancer' | 'client' | 'admin';
 
@@ -145,6 +145,42 @@ export interface AdminSellerRatingSummary {
   createdAt: string;
 }
 
+export interface AdminAnnouncement {
+  id: string;
+  createdBy: string;
+  targetUid?: string;
+  targetUserName?: string;
+  title: string;
+  body: string;
+  link?: string;
+  deliveryMode: 'notification' | 'popup' | 'both';
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AdminNotificationDraft {
+  audience: 'general' | 'individual';
+  targetUid: string;
+  title: string;
+  body: string;
+  link: string;
+  deliveryMode: 'notification' | 'popup' | 'both';
+}
+
+export interface AdminUserReport {
+  id: string;
+  reporterUid: string;
+  reporterName: string;
+  reportedUid: string;
+  reportedName: string;
+  reason: string;
+  details?: string;
+  status: 'pending' | 'reviewing' | 'resolved' | 'dismissed';
+  adminNote?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface AdminUserProfileDraft {
   displayName: string;
   email: string;
@@ -250,6 +286,8 @@ export interface AdminOverview {
   marketSellerRatings: number;
   companyFollows: number;
   transactionPins: number;
+  pendingReports: number;
+  activeAnnouncements: number;
 }
 
 export interface AdminSnapshot {
@@ -261,4 +299,6 @@ export interface AdminSnapshot {
   posts: AdminPost[];
   comments: AdminComment[];
   walletTransactions: AdminWalletTransaction[];
+  notifications: AdminAnnouncement[];
+  userReports: AdminUserReport[];
 }
